@@ -51,7 +51,7 @@ gulp.task('imagem', async () => (
             concurrent: 10,
             quiet: true
         }))
-        .pipe(gulp.dest('/dist/images'))   
+        .pipe(gulp.dest('./dist/images'))   
 ));
 
 /*gulp.task('default', gulp.series(['cssmin', 'uglify', 'imagem']))*/
