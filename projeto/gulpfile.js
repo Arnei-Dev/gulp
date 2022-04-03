@@ -1,13 +1,16 @@
 
 
 import gulp from 'gulp' ;
-/*import image from 'gulp-image';*/
 import cssmin from 'gulp-cssmin';
 import uglify from 'gulp-uglify';
 import concat from 'gulp-concat';
 import rename from 'gulp-rename';
 import imagemin from 'gulp-imagemin';
-
+import htmlmin from 'gulp-htmlmin';
+import babel from 'gulp-babel';
+//import { create } from 'browser-sync';
+import browserSync from 'browser-sync'// servidor dinamico
+const reload = browserSync.reload
 
 
 gulp.task('cssmin', () => (
@@ -32,6 +35,11 @@ gulp.task('uglify', () => (
          './vendor/jquery-ui/jquery-ui.js',
          './src/js/custom.js'
      ])
+        .pipe(babel({
+            comments: false,
+            compact: true,
+            presets: ['@babel/env']
+        }))
         .pipe(concat('scripts.js'))
         .pipe(uglify())
         .pipe(rename({ suffix: '.min'}))
@@ -42,7 +50,7 @@ gulp.task('imagem', async () => (
     gulp.src('./src/images/*')
         .pipe(imagemin({
             pngquant: true,
-            optipng: false,
+            optipng: true,
             zopflipng: true,
             jpegRecompress: false,
             mozjpeg: true,
@@ -54,5 +62,20 @@ gulp.task('imagem', async () => (
         .pipe(gulp.dest('/dist/images'))   
 ));
 
-/*gulp.task('default', gulp.series(['cssmin', 'uglify', 'imagem']))*/
-gulp.task('default', gulp.parallel(['cssmin', 'uglify', 'imagem']))
+gulp.task ('task-html', (callback) => {
+    gulp.src('./src/**/*.html')
+        .pipe(htmlmin({collapseWhitespace: true}))
+        .pipe(gulp.dest('./dist'))
+    return callback()//EXEMPLO COM CALLBACK
+})
+
+gulp.task('serve', function(){
+    browserSync.init({
+       server: {
+            baseDir: './dist'
+        }
+    })
+    gulp.watch('./dist/**/*').on('change', reload)
+})
+gulp.task('default', gulp.series(['cssmin', 'uglify', 'imagem', 'task-html', 'serve']))
+//gulp.task('default', gulp.parallel(['cssmin', 'uglify', 'imagem', 'task-html', 'serve']))
